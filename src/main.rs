@@ -126,7 +126,6 @@ impl ZellijPlugin for PluginState {
                         // INFO: render updated state to String
                         *self.session.borrow_mut() = segment.to_string();
 
-                        self.tabs = Tabs::new(session.tabs);
                         should_render = true;
                         break;
                     }
