@@ -1,3 +1,6 @@
+mod clock;
+
+use clock::Clock;
 use zellij_tile::prelude::*;
 
 use std::{
@@ -9,7 +12,6 @@ use std::{
 };
 
 use anstyle::{AnsiColor, Color, RgbColor, Style as AnsiStyle};
-use chrono_tz::Tz;
 use lazy_static::lazy_static;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -482,38 +484,5 @@ where
 impl<T> Shared<T> {
     fn new(inner: T) -> Self {
         Self(Rc::new(DisplayRefCell::new(inner)))
-    }
-}
-
-pub struct Clock {
-    tz: Tz,
-    format: String,
-}
-
-impl Display for Clock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let now = chrono::Local::now();
-        write!(f, "{}", now.with_timezone(&self.tz).format(&self.format))
-    }
-}
-
-impl Default for Clock {
-    fn default() -> Self {
-        Self {
-            tz: Tz::UTC,
-            format: "󰅐 %Y-%m-%dT%H:%M:%S%:z  epoch: %s".to_string(),
-        }
-    }
-}
-
-impl Clock {
-    fn new(tz: Option<&String>) -> Self {
-        let mut clock = Self::default();
-        if let Some(tz) = tz {
-            if let Ok(tz) = tz.parse() {
-                clock.tz = tz;
-            }
-        };
-        clock
     }
 }
