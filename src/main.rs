@@ -301,17 +301,16 @@ impl Display for Segment {
             );
         }
 
-        let style = self.style;
         let begin_style = AnsiStyle::new()
-            .bg_color(style.get_bg_color())
+            .bg_color(self.style.get_bg_color())
             .fg_color(*BG)
             .render();
         let end_style = AnsiStyle::new()
-            .fg_color(style.get_bg_color())
+            .fg_color(self.style.get_bg_color())
             .bg_color(*BG)
             .render();
-        let reset = style.render_reset();
-        let style = style.render();
+        let reset = self.style.render_reset();
+        let style = self.style.render();
 
         write!(
             f,
