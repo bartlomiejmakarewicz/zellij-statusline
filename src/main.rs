@@ -324,18 +324,6 @@ impl Display for Segment {
     }
 }
 
-#[derive(Default)]
-pub struct Segments(Vec<Segment>);
-
-impl Display for Segments {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for segment in &self.0 {
-            write!(f, "{segment}")?;
-        }
-        Ok(())
-    }
-}
-
 #[derive(Default, PartialEq, Clone, Copy)]
 pub struct Mode(InputMode);
 
@@ -403,29 +391,37 @@ impl Display for Tabs {
 
 impl Tabs {
     fn new(inner: Vec<TabInfo>) -> Self {
-        let full = Segments(inner.iter().map(Segment::new_tab).collect());
-        let compact = Segments(inner.iter().map(Segment::new_compact_tab).collect());
+        let full: String = inner
+            .iter()
+            .map(Segment::new_tab)
+            .map(|x| x.to_string())
+            .collect();
+
+        let compact: String = inner
+            .iter()
+            .map(Segment::new_compact_tab)
+            .map(|x| x.to_string())
+            .collect();
+
         let last = inner.len() - 1;
         let fold = if let Some(active) = inner.iter().find(|x| x.active) {
-            let active_segment = Segment::new_tab(active);
-            if active.position == 0 {
-                Segments(vec![active_segment, Segment::new_range_tab(1..last)])
-            } else if active.position == last {
-                Segments(vec![Segment::new_range_tab(0..last - 1), active_segment])
-            } else {
-                Segments(vec![
-                    Segment::new_range_tab(0..active.position - 1),
-                    active_segment,
-                    Segment::new_range_tab(active.position + 1..last),
-                ])
+            let mut active_segment = Segment::new_tab(active).to_string();
+            if active.position != 0 {
+                active_segment = format!(
+                    "{}{active_segment}",
+                    Segment::new_range_tab(0..active.position - 1)
+                );
             }
+            if active.position != last {
+                active_segment = format!(
+                    "{active_segment}{}",
+                    Segment::new_range_tab(active.position + 1..last)
+                )
+            }
+            active_segment.to_string()
         } else {
-            Segments(vec![Segment::new_range_tab(0..last)])
+            Segment::new_range_tab(0..last).to_string()
         };
-
-        let full = full.to_string();
-        let compact = compact.to_string();
-        let fold = fold.to_string();
 
         Self {
             max_width: usize::MAX,
